@@ -69,6 +69,8 @@ A fully specified synthetic queue has known positions. Queue uncertainty enters 
 
 ## Milestone 3: run a reproducible comparison
 
+Status: implemented November 22, 2026 (`world.py`, `agents.py`, `venues.py`, `experiment.py`, `report.py`). The development run is complete. Freezing and final evaluation are pending.
+
 Implement the smallest generator, strategies, and execution comparisons needed by the frozen experiment specification. Start with zero delay to establish a baseline; add fees and explicit delay scenarios in a documented order.
 
 The report should include:

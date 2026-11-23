@@ -12,11 +12,16 @@ The first version will compare fixed quotes with inventory-adjusted quotes in a 
 
 ## Status
 
-Milestone 1 implemented, November 22, 2026; milestone 2's experiment specification is drafted in [docs/EXPERIMENT.md](docs/EXPERIMENT.md) and not yet frozen. The matching engine (`src/mmsim/`) reproduces the six-event sequence and passes its tests. Strategies, experiments, and the interface have not been implemented, and there are no measured results yet.
+Milestones 1 and 2 done, and milestone 3 built, November 22, 2026. The engine, the synthetic market, both strategies, the four fill models, the experiment runner, and the report are implemented and tested. The development run (seeds 0–99) has been completed. The experiment specification is not yet frozen and the final evaluation has not been run, so there are no reported results yet.
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -e '.[test]'
 .venv/bin/python -m pytest
+
+# development run and report (about 90 seconds on 14 cores)
+.venv/bin/pip install -e '.[report]'
+.venv/bin/python -m mmsim.experiment --seeds 0-99 --out artifacts/dev.jsonl
+.venv/bin/python -m mmsim.report artifacts/dev.jsonl > artifacts/dev-report.md
 ```
 
 ## First version
@@ -37,4 +42,4 @@ Inventory-aware quoting and queue models already have a substantial literature. 
 
 ## Continue development
 
-Read [AGENTS.md](AGENTS.md), then start with milestone 1 in [docs/PLAN.md](docs/PLAN.md). The matching core has no runtime dependencies; tests use pytest.
+Read [AGENTS.md](AGENTS.md), then start with milestone 1 in [docs/PLAN.md](docs/PLAN.md). The simulator has no runtime dependencies. Tests use pytest and the report uses numpy.

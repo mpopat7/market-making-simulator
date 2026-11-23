@@ -17,7 +17,7 @@ A hidden fair value `V` starts at 1000 ticks. At the start of each step it moves
 Every step runs the phases below in this fixed order. The order matters, so it is part of the specification.
 
 1. **Fair value update** (above).
-2. **Background cancellations.** Each resting background order is canceled independently with probability `p_cancel`.
+2. **Background cancellations.** Each background order draws a lifetime from Geometric(`p_cancel`) when it is posted and is canceled when the lifetime ends. This has the same distribution as canceling each resting order independently with probability `p_cancel` per step.
 3. **Background liquidity provider** (owner `bg-lp`). With probability `p_post`, it posts one limit order. The side is equally likely to be buy or sell. The order sits `k` ticks away from `V` on that side, where `k = 1 + Geometric(0.5)`, capped at 5. The size is uniform on 1–5. The provider only posts passively: if the price would cross the current book, it skips posting that step.
 4. **Background taker** (owner `bg-taker`). With probability `p_market`, it sends one market order of size uniform on 1–3. With probability `informed`, the order is informed: it buys if the best ask is below `V`, sells if the best bid is above `V`, and otherwise does nothing. Uninformed orders pick a side at random.
 5. **Market maker decision** (section 2), which applies after the latency delay in section 4.
@@ -65,7 +65,7 @@ The approximate models leave out two things on purpose: queue information (they 
 
 ## 4. Costs, delay, and the end of a run
 
-- **Fees:** each unit the market maker fills as maker costs `fee` ticks. The baseline is `fee = 0`. Fee scenarios: `fee ∈ {0, 0.1}`. Fees are kept as a separate ledger in tenths of a tick, so the matching core stays in integer ticks.
+- **Fees:** each unit the market maker fills costs `fee` ticks, whether the fill is passive or immediate. The baseline is `fee = 0`. Fee scenarios: `fee ∈ {0, 0.1}`. Fees are kept as a separate ledger in tenths of a tick, so the matching core stays in integer ticks.
 - **Delay:** a market maker instruction decided at step `t` reaches the book at the start of phase 5 in step `t + d`. Cancels are delayed too, so a quote can fill while its cancel is still on the way. The baseline is `d = 0`. Delay scenarios: `d ∈ {0, 1, 5}`. Approximate models apply the same delay.
 - **Warm-up:** the market maker does not quote during the first 1,000 steps, so the background book can fill in.
 - **Run length:** 20,000 steps after warm-up.
@@ -81,7 +81,7 @@ The approximate models leave out two things on purpose: queue information (they 
 
 ## 6. Pairing and random streams
 
-Each run seed gives separate random streams for fair value, cancellations, provider posts, and taker orders. Each is a `random.Random` seeded from the string `f"{seed}:{stream}"`. The fair-value path is therefore **identical** across models and strategies for a given seed. The background streams start in the same state, but they drift apart once the book differs, because the number of cancel draws depends on how many orders are resting, and informed takers react to the quotes. This drift is part of market impact, and it is the reason section 3 says the error includes impact.
+Each run seed gives separate random streams for fair value, cancellations, provider posts, and taker orders. Each is a `random.Random` seeded from the string `f"{seed}:{stream}"`. The fair-value path is therefore **identical** across models and strategies for a given seed. The provider and taker streams make the same draws every step whether or not an order is sent, and cancellation times are drawn when an order is posted. Every world for a given seed therefore sees the same proposed background orders at the same steps. They differ only where the book changes a decision: the post-only check skips a post, an informed taker sees different quotes, or a market order meets different liquidity. That difference is market impact, and it is the reason section 3 says the error includes impact.
 
 Within a seed, comparisons are always **paired**: the same seed under different models or strategies.
 
@@ -105,7 +105,7 @@ Lower inventory risk counts as a gain only if it is reported next to the profit 
 
 **Development grid:** `p_jump ∈ {0.01, 0.04}` × `informed ∈ {0, 0.3}` × `fee ∈ {0, 0.1}` × `d ∈ {0, 1, 5}`, with **seeds 0–99**. Development runs are for debugging, calibration within section 1's limits, and checking that the report pipeline works.
 
-**Final evaluation:** the same grid plus held-out settings that were never run during development (`p_jump = 0.02`, `informed = 0.15`), with **seeds 10000–10199**. Final seeds are run once, after freezing.
+**Final evaluation:** `p_jump ∈ {0.01, 0.02, 0.04}` × `informed ∈ {0, 0.15, 0.3}` × `fee ∈ {0, 0.1}` × `d ∈ {0, 1, 5}`, with **seeds 10000–10199**. The values `p_jump = 0.02` and `informed = 0.15` were never run during development. Final seeds are run once, after freezing.
 
 **Uncertainty:** each run produces one value for each statistic. Results are reported as the mean across runs with a 95% percentile bootstrap interval (10,000 resamples, bootstrap seed fixed in the config), and the bootstrap is always run on **paired per-seed differences**. Events within a run are never treated as independent samples.
 
@@ -123,3 +123,7 @@ A ranking reversal is one possible result to measure. It is not a goal. Null res
 ## 10. Change log
 
 - 2026-11-22: initial draft.
+- 2026-11-22, before any scoring: cancellations are drawn as lifetimes when an order is posted, and every random draw is made every step, so paired worlds stay aligned (sections 1 and 6). The cancellation distribution is unchanged.
+- 2026-11-22, before any scoring: fees apply to immediate fills as well as passive ones. A quote that crosses the book (possible under large inventory skew) would otherwise be free.
+- 2026-11-22, development run: an implementation bug was found in the approximate venues. A quote that crossed the displayed background book took that liquidity without removing it, so later quotes could take the same stale order again. Each venue now records what it has taken and cannot take it twice (`test_virtual_venue_cannot_take_the_same_displayed_order_twice`). Before the fix, all approximate models reversed the skew-versus-fixed ranking at `p_jump = 0.04, informed = 0.3, d = 0`. After the fix, no development comparison disagrees with the reference. The fix corrects a defect in the stated rule from section 3 and does not change any rule.
+- 2026-11-22, development run (seeds 0–99, all 24 development settings, rerun after the fix): no calibration change needed. No seed failed, no book side was ever empty, and the market maker fills about 600 units per run.
