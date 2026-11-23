@@ -12,7 +12,9 @@ The first version will compare fixed quotes with inventory-adjusted quotes in a 
 
 ## Status
 
-Milestones 1 and 2 done, and milestone 3 built, November 22, 2026. The engine, the synthetic market, both strategies, the four fill models, the experiment runner, and the report are implemented and tested. The development run (seeds 0–99) has been completed. The experiment specification is not yet frozen and the final evaluation has not been run, so there are no reported results yet.
+Final evaluation complete, November 22, 2026, under the frozen specification `experiment-v1`. See [docs/RESULTS.md](docs/RESULTS.md).
+
+**Headline (synthetic market only):** a touch-fill backtest roughly doubles the market maker's volume and profit. A queue-position estimate comes within 3–13% on volume but always overstates it, and most of its remaining error is market impact that no replay of market-maker-free data can show. Despite these errors, no fill model reversed the ranking of inventory-skewed versus fixed quotes in any of the 54 final settings.
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -e '.[test]'
