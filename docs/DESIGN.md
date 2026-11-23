@@ -29,3 +29,11 @@ These repositories are architectural references. No implementation code has been
 - A result under selected simulated conditions supports a claim about those conditions. Broader market claims require additional evidence.
 - Record null results and disagreements between models. Do not change the comparison merely to produce a ranking reversal or positive profit.
 - Claims of speed require measured workloads, hardware, build configuration, and reproducible commands.
+
+## Matching-core decisions (milestone 1)
+
+- **Rejections are events, not exceptions.** `submit()` returns a `Rejected` event so a replay log records every instruction's outcome. Rejected instructions leave the book and order records unchanged.
+- **Rejection cases.** A reused order ID (including one from a completed order), a quantity that is not a positive integer, a limit price that is not a positive integer tick, and cancellation of an unknown, filled, or already canceled order.
+- **Self-trade prevention cancels the newest order.** When an incoming order reaches a resting order from the same owner, the incoming remainder is canceled with reason `SELF_TRADE`. Earlier trades against other owners stand and the resting order keeps its queue position. A market maker quoting both sides would otherwise trade with itself after a quote crosses, which is a wash trade and distorts volume and fill counts.
+- **Invariant checks live in the package**, not only in the tests, so simulation runs in later milestones can call `check_invariants` too.
+- **Best-price lookup scans the price levels.** This is linear in the number of levels and is enough for the experiment's book sizes. Replace it with a sorted structure only if profiling shows a need.

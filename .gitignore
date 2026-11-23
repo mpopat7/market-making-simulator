@@ -13,3 +13,4 @@ htmlcov/
 !.env.example
 data/raw/
 artifacts/
+*.egg-info/
