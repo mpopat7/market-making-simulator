@@ -47,6 +47,8 @@ Choose the smallest Python package layout and test setup that support this miles
 
 ## Milestone 2: define the experiment before scoring it
 
+Status: drafted in [EXPERIMENT.md](EXPERIMENT.md), November 22, 2026; not yet frozen.
+
 Write an experiment specification before comparing outcomes. Record the choices below as actual decisions, including why each choice is useful. They remain open at repository creation:
 
 - The background order-flow generator, its parameters, and the price or fair-value process, if used.

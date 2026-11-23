@@ -12,7 +12,12 @@ The first version will compare fixed quotes with inventory-adjusted quotes in a 
 
 ## Status
 
-Planning, November 22, 2026. This repository contains the project specification and the first implementation task. The matching engine, strategies, experiments, and interface have not been implemented, and there are no measured results yet.
+Milestone 1 implemented, November 22, 2026; milestone 2's experiment specification is drafted in [docs/EXPERIMENT.md](docs/EXPERIMENT.md) and not yet frozen. The matching engine (`src/mmsim/`) reproduces the six-event sequence and passes its tests. Strategies, experiments, and the interface have not been implemented, and there are no measured results yet.
+
+```bash
+python3 -m venv .venv && .venv/bin/pip install -e '.[test]'
+.venv/bin/python -m pytest
+```
 
 ## First version
 
@@ -32,4 +37,4 @@ Inventory-aware quoting and queue models already have a substantial literature. 
 
 ## Continue development
 
-Read [AGENTS.md](AGENTS.md), then start with milestone 1 in [docs/PLAN.md](docs/PLAN.md). Dependencies and the package layout will be selected when implementation begins.
+Read [AGENTS.md](AGENTS.md), then start with milestone 1 in [docs/PLAN.md](docs/PLAN.md). The matching core has no runtime dependencies; tests use pytest.
