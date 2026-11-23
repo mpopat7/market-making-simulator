@@ -36,6 +36,10 @@ class OrderBook:
         if not level:
             del self._levels[order.side][order.price]
 
+    def level(self, side: Side, price: int) -> tuple[Order, ...]:
+        """Resting orders at one price, in time priority. Empty if none."""
+        return tuple(self._levels[side].get(price, ()))
+
     def orders(self, side: Side) -> list[Order]:
         """Resting orders on one side, best price first, then time priority."""
         levels = self._levels[side]
