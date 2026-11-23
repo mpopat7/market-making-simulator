@@ -1,6 +1,6 @@
 # Experiment specification
 
-Milestone 2 of [PLAN.md](PLAN.md). This file states the experiment before any outcome is scored. Status: **draft for review, November 22, 2026. Not frozen.** Section 9 describes how it is frozen and how later changes are recorded.
+Milestone 2 of [PLAN.md](PLAN.md). This file states the experiment before any outcome is scored. Status: **Frozen as `experiment-v1`, November 22, 2026.** Section 9 describes how it is frozen and how later changes are recorded.
 
 All prices and costs are in integer ticks, and all quantities are integer units. A "step" is one tick of simulated event time, not wall-clock time.
 
@@ -126,4 +126,5 @@ A ranking reversal is one possible result to measure. It is not a goal. Null res
 - 2026-11-22, before any scoring: cancellations are drawn as lifetimes when an order is posted, and every random draw is made every step, so paired worlds stay aligned (sections 1 and 6). The cancellation distribution is unchanged.
 - 2026-11-22, before any scoring: fees apply to immediate fills as well as passive ones. A quote that crosses the book (possible under large inventory skew) would otherwise be free.
 - 2026-11-22, development run: an implementation bug was found in the approximate venues. A quote that crossed the displayed background book took that liquidity without removing it, so later quotes could take the same stale order again. Each venue now records what it has taken and cannot take it twice (`test_virtual_venue_cannot_take_the_same_displayed_order_twice`). Before the fix, all approximate models reversed the skew-versus-fixed ranking at `p_jump = 0.04, informed = 0.3, d = 0`. After the fix, no development comparison disagrees with the reference. The fix corrects a defect in the stated rule from section 3 and does not change any rule.
-- 2026-11-22, development run (seeds 0–99, all 24 development settings, rerun after the fix): no calibration change needed. No seed failed, no book side was ever empty, and the market maker fills about 600 units per run.
+- 2026-11-22, development run (seeds 0–99, all 24 development settings, rerun after the fix): no calibration change needed.
+- 2026-11-22: frozen as `experiment-v1`. No seed failed, no book side was ever empty, and the market maker fills about 600 units per run.
